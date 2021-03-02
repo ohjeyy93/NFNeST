@@ -413,7 +413,7 @@ process tojson {
         tuple val(sample), path("wholecombine.json") into tojson_out
     script:
         """
-        python ${pyscripts_path}/tojson.py -d1 $baseDir/local/nest_angola_vis_2/forjson
+        python ${pyscripts_path}/tojson.py -d1 $baseDir/$params.output.folder/forjson
         """
 }
 
