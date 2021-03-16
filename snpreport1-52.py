@@ -1206,11 +1206,16 @@ filteredreportablelist12=[]
 
 
 combinedwildgeneAA=[]
+
+#print(wholepotlist1)
+#print(combinedGenePOSlist1)
 #print(combinedGenePOSlist1)
 for y in wholepotlist1:
     #count=0
     for x in range(len(combinedGenePOSlist1)):
         #count+=1
+        #print(x)
+        #print(len(combinedGenePOSlist1))
         if [y[0],int(y[1])] == combinedGenePOSlist1[x]:
             #print(combinedGenePOSlist1[x])
             #print("True")
@@ -1250,6 +1255,29 @@ for y in wholepotlist1:
             filteredMQRankSumlist12+=["NA"]
             filteredfilterscorelist12+=["NA"]
             filteredDescriptionlist12+=["NA,NA,NA,NA"]
+
+
+if combinedGenePOSlist1==[]:
+    for y in wholepotlist1:
+        combinedwildgeneAA+=[[y[0],int(y[1])]]
+        filteredGenelist22+=[y[0]]
+        filteredPoslist22+=["NA"]
+        filtereddepthlist2up2+=["NA"]
+        filteredReflist22+=["NA"]
+        filteredAltlist22+=["NA"]
+        filteredAAlist212+=[testdicttransAA1[y[0]][int(y[1])-1]]
+        filteredAAlist222+=[dicttransAA1[y[0]][int(y[1])-1]]
+        filteredAAPoslist122+=[y[1]]
+        filteredcodondepthlist22+=["NA"]
+        filteredAFlist12+=["NA"]
+        filteredmutationlist12+=["Wildtype"]
+        filteredQDlist12+=["NA"]
+        filteredSORlist12+=["NA"]
+        filteredMQlist12+=["NA"]
+        filteredMQRankSumlist12+=["NA"]
+        filteredfilterscorelist12+=["NA"]
+        filteredDescriptionlist12+=["NA,NA,NA,NA"]
+
 
 
 candidateslist1=[]
