@@ -10,7 +10,7 @@ out_path = Channel.fromPath(params.output.folder)
 bed_path = Channel.fromPath(params.input.bed_path)
 variant_path = Channel.fromPath(params.input.variant_path)
 bbduk_path = "$params.input.bbduk_def"
-params.genome = "$baseDir/ref/pfalciparum/New_6_genes.fa"
+params.genome = "$baseDir/New_6_genes.fa"
 params.bed = "$baseDir/ref⁩/pfalciparum⁩/New_6_genes.bed"
 params.fas = "$baseDir/ref/pfalciparum/adapters.fa"
 params.gatk= "$baseDir/gatk-4.1.9.0/gatk"
@@ -181,7 +181,7 @@ process GenerateVCF {
         """
         bcftools mpileup -f ${genome} ${bam_path} > ${sample}.mpileup
         bcftools call -vm ${sample}.mpileup > ${sample}-1.vcf
-        $baseDir/gatk-4.1.9.0/gatk HaplotypeCaller -R $baseDir/ref/pfalciparum/New_6_genes.fa -I ${bam_path} -O ${sample}-2.vcf
+        $baseDir/gatk-4.1.9.0/gatk HaplotypeCaller -R $baseDir/New_6_genes.fa -I ${bam_path} -O ${sample}-2.vcf
         freebayes -f ${genome} ${bam_path} > ${sample}-3.vcf
         """
 }
@@ -189,7 +189,7 @@ process GenerateVCF {
 
 process annotate {
     publishDir "$params.output.folder/annotate/${sample}", mode : "copy"
-    errorStrategy 'ignore'
+    /*errorStrategy 'ignore'*/
 
     input:
         set val(sample), path(vcf_path1), path(vcf_path2), path(vcf_path3) from vcf_out1
@@ -199,9 +199,9 @@ process annotate {
 
     script:
         """
-        java -Xmx8g -jar $baseDir/snpEff/snpEff.jar 6genes4 -interval $baseDir/ref/pfalciparum/annotation.bed ${vcf_path1} > ${sample}-1.ann.vcf
-        java -Xmx8g -jar $baseDir/snpEff/snpEff.jar 6genes4 -interval $baseDir/ref/pfalciparum/annotation.bed ${vcf_path2} > ${sample}-2.ann.vcf
-        java -Xmx8g -jar $baseDir/snpEff/snpEff.jar 6genes4 -interval $baseDir/ref/pfalciparum/annotation.bed ${vcf_path3} > ${sample}-3.ann.vcf
+        java -Xmx8g -jar $baseDir/snpEff/snpEff.jar new6genes2 -interval $baseDir/annotations2.bed ${vcf_path1} > ${sample}-1.ann.vcf
+        java -Xmx8g -jar $baseDir/snpEff/snpEff.jar new6genes2 -interval $baseDir/annotations2.bed ${vcf_path2} > ${sample}-2.ann.vcf
+        java -Xmx8g -jar $baseDir/snpEff/snpEff.jar new6genes2 -interval $baseDir/annotations2.bed ${vcf_path3} > ${sample}-3.ann.vcf
         """
 
 }
@@ -239,7 +239,7 @@ process merge {
     script:
         """
         samtools index ${bam_path}
-        python $baseDir/annotate.py -r $baseDir/ref/pfalciparum/New_6_genes.fa -b $baseDir/New_6_genes.bed -o ${sample} -v1 ${vcf_path1} -v2 ${vcf_path2} -v3 ${vcf_path3} -m ${bam_path} -voi $baseDir/ref/pfalciparum/voinew2.csv -name ${sample}
+        python $baseDir/annotate.py -r $baseDir/New_6_genes.fa -b $baseDir/New_6_genes.bed -o ${sample} -v1 ${vcf_path1} -v2 ${vcf_path2} -v3 ${vcf_path3} -m ${bam_path} -voi $baseDir/voinew3.csv -name ${sample}
         """
 }
 
@@ -312,6 +312,7 @@ process snpfilter {
 
 process haplo {
     publishDir "$params.output.folder/haplo/${sample}", pattern: "*.csv", mode : "copy"
+    errorStrategy 'ignore'
     input:
         set val(sample), path("${sample}.csv") from snpfilter_out1
     output:
