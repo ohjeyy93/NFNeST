@@ -182,7 +182,7 @@ process GenerateVCF {
         bcftools mpileup -B -Q 0 -q 0 -d 0 -A -B -f ${genome} ${bam_path}  > ${sample}.mpileup
         bcftools call -vm ${sample}.mpileup > ${sample}-1.vcf
         $baseDir/gatk-4.1.9.0/gatk HaplotypeCaller -R $baseDir/New_6_genes.fa -I ${bam_path} -O ${sample}-2.vcf --base-quality-score-threshold 6 --max-reads-per-alignment-start 0 --min-base-quality-score 0 --standard-min-confidence-threshold-for-calling 0
-        freebayes -f ${genome} -F 0.01 -E 3 --report-all-haplotype-alleles ${bam_path} > ${sample}-3.vcf
+        freebayes -f ${genome} -q 0 -m 0 -Q 0 -F 0.01 -E 3 --haplotype-length 1 ${bam_path} > ${sample}-3.vcf
         """
 }
 
@@ -245,6 +245,7 @@ process merge {
 
 process filter {
     publishDir "$params.output.folder/filter/${sample}", mode : "copy"
+    errorStrategy 'ignore'
 
     input:
         set val(sample), path(vcf_path1) from merge_out
@@ -254,7 +255,7 @@ process filter {
 
     script:
         """
-        java -jar $baseDir/snpEFF/SnpSift.jar filter -f ${vcf_path1} " ( VARTYPE = 'SNP' ) " > ${sample}_filtered.vcf
+        java -jar $baseDir/snpEFF/SnpSift.jar filter -f ${vcf_path1} " (( VARTYPE = 'SNP' ) & ( AF  > 0 )) | ((TYPE = 'complex,snp') & ( AF  > 0 )) | ((TYPE = 'complex,complex') & ( AF  != 0,0 )) " > ${sample}_filtered.vcf
         """
 }
 
@@ -270,7 +271,7 @@ process extract {
 
     script:
     """
-    java -Xmx8g -jar $baseDir/snpEff/SnpSift.jar extractFields ${vcf_path1} CHROM POS REF ALT VARTYPE Confidence Sources DP4 DP AD GEN[*].AD "ANN[*].EFFECT" "ANN[*].HGVS_C" "ANN[*].HGVS_P" > final_${vcf_path1}ext.vcf
+    java -Xmx8g -jar $baseDir/snpEff/SnpSift.jar extractFields ${vcf_path1} CHROM POS REF ALT VARTYPE Confidence Sources AF DP4 DP AD GEN[*].AD "ANN[*].EFFECT" "ANN[*].HGVS_C" "ANN[*].HGVS_P" > final_${vcf_path1}ext.vcf
     """
 }
 

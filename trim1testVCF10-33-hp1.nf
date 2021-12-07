@@ -69,7 +69,7 @@ process trimFastq {
     script:
         """          
         bbduk.sh -Xmx1g ktrimright=t k=27 hdist=1 edist=0 ref=${fas} \\
-        qtrim=rl trimq=35 minlength=150 trimbyoverlap=t minoverlap=24 ordered=t qin=33 in=${read_one} in2=${read_two} \\
+        qtrim=rl trimq=25 minlength=50 trimbyoverlap=t minoverlap=24 ordered=t qin=33 in=${read_one} in2=${read_two} \\
         out=${sample}_trimmed_R1.fastq out2=${sample}_trimmed_R2.fastq stats=${sample}_stats.txt 
         """
 }
@@ -179,10 +179,10 @@ process GenerateVCF {
 
     script:
         """
-        bcftools mpileup -f ${genome} ${bam_path} > ${sample}.mpileup
+        bcftools mpileup -B -Q 0 -q 0 -d 0 -A -B -f ${genome} ${bam_path}  > ${sample}.mpileup
         bcftools call -vm ${sample}.mpileup > ${sample}-1.vcf
-        $baseDir/gatk-4.1.9.0/gatk HaplotypeCaller -R $baseDir/New_6_genes.fa -I ${bam_path} -O ${sample}-2.vcf
-        freebayes -f ${genome} ${bam_path} > ${sample}-3.vcf
+        $baseDir/gatk-4.1.9.0/gatk HaplotypeCaller -R $baseDir/New_6_genes.fa -I ${bam_path} -O ${sample}-2.vcf --base-quality-score-threshold 6 --max-reads-per-alignment-start 0 --min-base-quality-score 0 --standard-min-confidence-threshold-for-calling 0 --phred-scaled-global-read-mismapping-rate 70 --max-alternate-alleles 20 --indel-size-to-eliminate-in-ref-model 20 --kmer-size 35
+        freebayes -f ${genome} -q 0 -m 0 -Q 0 -F 0.01 ${bam_path} > ${sample}-3.vcf
         """
 }
 
