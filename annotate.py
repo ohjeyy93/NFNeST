@@ -26,9 +26,11 @@ from nest.kestrel import kes_runner
 from nest.summarize import Summary
 from nest.prepinputs import Prepper
 from nest.parsers.vcfReader import Reader 
-from nest.parsers.vcfmerge import Merge
+from nest.parsers.newannotate1 import Merge
 from nest.parsers.vcfannotate import Annotate
 from nest.parsers.vcfwriter import Writer
+import os
+
 def main(r,b,o,v1,v2,v3,m,voi,n):
     ref_path=r
     bed_path=b
@@ -42,10 +44,31 @@ def main(r,b,o,v1,v2,v3,m,voi,n):
     main_logger = logging.getLogger('NeST.{0}'.format(sam_name))
     #Filer  and annotate variant calls
     main_logger.debug('Annotating variants')
-    vcf_dict = {vcf_path2: 'GATK', vcf_path1: 'Samtools', vcf_path3: 'Freebayes'}
+    ###if file empty don't include in dictionary....}
+    #print(vcf_path1)
+    #print(os.stat(vcf_path1).st_size)
+    #print(os.stat(vcf_path2).st_size)
+    #print(os.stat(vcf_path3).st_size)
+    vcf_dict={}
+    if os.stat(vcf_path1).st_size != 0:
+        vcf_dict[vcf_path1]='Samtools'
+    if os.stat(vcf_path2).st_size != 0:
+        vcf_dict[vcf_path2]='GATK'
+    if os.stat(vcf_path3).st_size != 0:
+        vcf_dict[vcf_path3]='Freebayes'
+    #print(vcf_dict)    
+    if vcf_dict=={}:
+        open('final_{1}.vcf'.format(out_path, sam_name), 'a').close()
+        return('final_{1}.vcf'.format(out_path, sam_name), 0)
+    #print(vcf_dict)
+    #vcf_dict = {vcf_path2: 'GATK', vcf_path1: 'Samtools', vcf_path3: 'Freebayes'}
     merger = Merge(out_path, vcf_dict, ref_path)
-    merged_vcf = merger.splitter(list(vcf_dict.keys()))[0]
-    final_vcf= '{0}/final_{1}.vcf'.format(out_path, sam_name)
+    #print((list(vcf_dict.keys()))[0])
+    #print(vcf_dict.keys())
+    #print(list(vcf_dict.keys()))
+    #print(list(vcf_dict.keys())[0])
+    merged_vcf = merger.merge(list(vcf_dict.keys()))
+    final_vcf= 'final_{1}.vcf'.format(out_path, sam_name)
     os.rename(merged_vcf, final_vcf)
     return(final_vcf, 0)
 
