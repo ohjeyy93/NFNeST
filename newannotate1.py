@@ -96,6 +96,7 @@ class Merge:
                                         if key not in dict2:
                                             dict2[key]="Freebayes"    
                                             dict3[key]=1
+                                    #print(word)
                                     dict1[key]=dict1[key]+";"+word
                         if key not in dict1:
                             if "#" not in line:
@@ -134,5 +135,6 @@ class Merge:
             for key in dict1:
                 if "#" not in dict1[key]:
                     #print(dict1[key][:-1])
-                    w1.write(dict1[key][:-1]+";Confidence="+str(dict3[key])+";Sources="+dict2[key]+"\n")
+                    #print(dict1[key][0:dict1[key].find("GT:")])
+                    w1.write(dict1[key][0:dict1[key].find("GT:")]+";Confidence="+str(dict3[key])+";Sources="+dict2[key]+" "+dict1[key][dict1[key].find("GT:")::])
         return w1
