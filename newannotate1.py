@@ -45,7 +45,7 @@ class Merge:
                         #print(key)
                         if key in dict1 and "#" not in key:
                             countw=0
-                            dict1[key]=dict1[key][0:dict1[key].find("VARTYPE=SNP")+11]
+                            dict1[key]=dict1[key][0:dict1[key].find("VARTYPE=SNP")]
                             #print(dict1[key])
                             for word in line.split(";"):
                                 countw+=1
@@ -70,7 +70,7 @@ class Merge:
                                 if countw==len(line.split(";")):
                                     #print(word)
                                     #print("True")
-                                    dict1[key]+word[12::]
+                                    #dict1[key]=dict1[key]+";"+word
                                     if "_1." in item:
                                         dict2[key]="samtools"
                                         dict3[key]=1
@@ -96,7 +96,7 @@ class Merge:
                                         if key not in dict2:
                                             dict2[key]="Freebayes"    
                                             dict3[key]=1
-                                    dict1[key]=dict1[key]+";"+word+"\n"
+                                    dict1[key]=dict1[key]+";"+word
                         if key not in dict1:
                             if "#" not in line:
                                 #print(line)
