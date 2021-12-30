@@ -16,5 +16,104 @@ class Merge:
          self.vcf_dict = vcf_dict
          self.ref_path = ref_path
 
-    def merge(self, vcflist):
-        print([1])
+    def merge(self, vcflist1):
+        dict1={}
+        dict2={}
+        dict3={}
+        #print(vcflist1[0][0:-14])
+        with open("final_"+vcflist1[0][0:-14]+".vcf", "w") as w1:
+            for item in vcflist1:
+                with open(item,"r") as w2:
+                    for line in w2:
+                        count=0
+                        key=""
+                        key2=""
+                        for word in line.split():
+                            #print("what")
+                            #print(line)
+                            #print(word)
+                            count+=1
+                            if count==1:
+                                key=word
+                                key2=word
+                            if count==2:
+                                key+=","+word
+                                key2+=","+word
+                            if count==4:
+                                key+=","+word
+                        #print(key)
+                        if key in dict1 and "#" not in key:
+                            countw=0
+                            for word in line.split(";"):
+                                countw+=1
+                                #print(word[0:word.find("=")])
+                                if word[0:word.find("=")] not in dict1[key]:
+                                    #print(word)
+                                    if key[0:key.find(",")] not in word and key[key.find(",")::] not in word:
+                                        #if key=="PfCRT,211,G" and countw==len(line.split(";"))-4:
+                                        #    print(word)
+                                        #print(word)
+                                        #print(len(line.split(";")))
+                                        #print(item)
+                                        if countw<len(line.split(";"))-4:
+                                            dict1[key]=dict1[key]+";"+word
+                                        if countw==len(line.split(";"))-4:
+                                            #print("True")
+                                            if "_1." in item:
+                                                dict2[key]="samtools"
+                                                dict3[key]=1
+                                            if "_2." in item:
+                                                if key in dict2:
+                                                #if dict2[key]=="samtools":
+                                                    dict2[key]="samtools,GATK"
+                                                    dict3[key]=2
+                                                else:
+                                                    dict2[key]="GATK"
+                                                    dict3[key]=1
+                                            if "_3." in item:
+                                                if key in dict2:
+                                                    if dict2[key]=="samtools,GATK":
+                                                        dict2[key]="samtools,GATK,Freebayes"
+                                                        dict3[key]=3
+                                                    if dict2[key]=="samtools":
+                                                        dict2[key]="samtools,Freebayes"
+                                                        dict3[key]=2
+                                                    if dict2[key]=="GATK":
+                                                        dict2[key]="GATK,Freebayes"
+                                                        dict3[key]=2
+                                                if key not in dict2:
+                                                    dict2[key]="Freebayes"    
+                                                    dict3[key]=1
+                                            dict1[key]=dict1[key]+","+word+"\n"
+                        if key not in dict1:
+                            if "#" not in line:
+                                dict1[key]=line[0:-1]
+                            if "#" in line:
+                                dict1[key]=line
+                            #print(key)
+                            if "_1." in item:
+                                dict2[key]="samtools"
+                                dict3[key]=1
+                            if "_2." in item:
+                                dict2[key]="GATK"
+                                dict3[key]=1
+                            if "_3." in item:
+                                dict2[key]="Freebayes"
+                                dict3[key]=1  
+            for key in dict1: 
+                #print(key)
+                #    print(dict1[key]) 
+                #print(key)
+                #if key in dict2:
+                #    print(dict2[key])
+                #if key not in dict2:
+                #    print(key)
+                if "#" in dict1[key]:
+                    w1.write(dict1[key])
+                #else:
+                    #print(dict1[key][:-1])
+                #    w1.write(dict1[key][:-1]+";Confidence="+str(dict3[key])+";Sources="+dict2[key]+"\n")
+            for key in dict1:
+                if "#" not in dict1[key]:
+                    w1.write(dict1[key][:-1]+";Confidence="+str(dict3[key])+";Sources="+dict2[key]+"\n")
+        return w1
